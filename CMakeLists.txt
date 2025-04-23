@@ -49,10 +49,10 @@ target_link_libraries(lidar_loopdetection ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(lidar_loopdetection cmr_lidarloop_gencpp)
 add_dependencies(lidar_loopdetection ${cmr_lidarloop_EXPORTED_TARGETS})
 
-add_executable(save_data_for_detector src/save_data_for_detector.cpp)
-target_link_libraries(save_data_for_detector ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-add_dependencies(save_data_for_detector cmr_lidarloop_gencpp)
-add_dependencies(save_data_for_detector ${cmr_lidarloop_EXPORTED_TARGETS})
+#add_executable(save_data_for_detector src/save_data_for_detector.cpp)
+#target_link_libraries(save_data_for_detector ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+#add_dependencies(save_data_for_detector cmr_lidarloop_gencpp)
+#add_dependencies(save_data_for_detector ${cmr_lidarloop_EXPORTED_TARGETS})
 
 add_executable(lidar_registration_server
     src/lidar_registration_server.cpp
