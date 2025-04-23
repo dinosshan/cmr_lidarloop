@@ -331,7 +331,7 @@ void mapDataCallback(const rtabmap_msgs::MapDataConstPtr & mapDataMsg, const rta
   auto start_hr = std::chrono::high_resolution_clock::now();
 
   rtabmap::Statistics stats;
-  rtabmap_msgs::infoFromROS(*infoMsg, stats);
+  rtabmap_conversions::infoFromROS(*infoMsg, stats);
 
   //Add link in RTAB-Map, if action server computed new transformation
   if(!result_processed && registration_ac->getState()==actionlib::SimpleClientGoalState::SUCCEEDED){

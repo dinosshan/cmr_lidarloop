@@ -98,7 +98,7 @@ void DataCallback(const rtabmap_msgs::MapDataConstPtr & mapDataMsg, const rtabma
   ROS_INFO("Received map data!");
 
   rtabmap::Statistics stats;
-  rtabmap_msgs::infoFromROS(*infoMsg, stats);
+  rtabmap_conversions::infoFromROS(*infoMsg, stats);
 
   bool smallMovement = (bool)uValue(stats.data(), rtabmap::Statistics::kMemorySmall_movement(), 0.0f);
   bool fastMovement = (bool)uValue(stats.data(), rtabmap::Statistics::kMemoryFast_movement(), 0.0f);
