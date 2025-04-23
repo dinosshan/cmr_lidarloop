@@ -18,7 +18,7 @@
 
 #include <rtabmap_msgs/MapData.h>
 #include <rtabmap_msgs/Info.h>
-#include <rtabmap/core/MsgConversion.h>
+#include <rtabmap_conversions/MsgConversion.h>
 #include <rtabmap_msgs/AddLink.h>
 
 #include <rtabmap/core/Rtabmap.h>
