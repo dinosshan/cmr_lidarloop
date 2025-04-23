@@ -125,7 +125,7 @@ void lidar_data::read_rtabmap_db(){
 
     for(size_t i=0; i<getMapSrv.response.data.nodes.size(); ++i)
     {
-      rtabmap::Signature s = rtabmap_msgs::nodeDataFromROS(getMapSrv.response.data.nodes[i]);
+      rtabmap::Signature s = rtabmap_conversions::nodeDataFromROS(getMapSrv.response.data.nodes[i]);
 
       all_ids.push_back(s.id());
 
@@ -155,7 +155,7 @@ void lidar_data::read_rtabmap_db(){
     ROS_ASSERT(getMapSrv.response.data.graph.poses.size() == getMapSrv.response.data.graph.posesId.size());
     for(size_t i=0; i<getMapSrv.response.data.graph.poses.size(); ++i)
     {
-      rtabmap::Transform t = rtabmap_msgs::transformFromPoseMsg(getMapSrv.response.data.graph.poses[i]);
+      rtabmap::Transform t = rtabmap_conversions::transformFromPoseMsg(getMapSrv.response.data.graph.poses[i]);
       std::vector<double> temp_xyz={t.x(), t.y(), t.z()};
       Eigen::Matrix4f current_transformation;
       current_transformation <<t.r11(),t.r12(),t.r13(),t.o14(),
@@ -290,7 +290,7 @@ void addLinkToRTABMap(){
     rtabmap::Transform t=rtabmap::Transform::fromEigen4f(loop_transformation.inverse());
     rtabmap::Link link(fromId, toId, rtabmap::Link::kUserClosure, t, infMatrix);
     rtabmap_msgs::AddLinkRequest req;
-    rtabmap_msgs::linkToROS(link, req.link);
+    rtabmap_conversions::linkToROS(link, req.link);
     rtabmap_msgs::AddLinkResponse res;
     if(!addLinkSrv.call(req, res))
     {
@@ -614,7 +614,7 @@ void mapDataCallback(const rtabmap_msgs::MapDataConstPtr & mapDataMsg, const rta
             }
             else if(getNodeDataSrv.response.data.size() == 1)
             {
-              rtabmap::Signature s = rtabmap_msgs::nodeDataFromROS(getNodeDataSrv.response.data[0]);
+              rtabmap::Signature s = rtabmap_conversions::nodeDataFromROS(getNodeDataSrv.response.data[0]);
               rtabmap::LaserScan scan;
               s.sensorData().uncompressDataConst(0, 0, &scan);
               pcl::PointCloud<pcl::PointXYZI>::Ptr target_cloud = rtabmap::util3d::laserScanToPointCloudI(scan, scan.localTransform());
