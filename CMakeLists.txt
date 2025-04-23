@@ -5,7 +5,7 @@ add_compile_options(-std=c++11)
 set (CMAKE_CXX_STANDARD 14)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp rospy std_msgs sensor_msgs geometry_msgs cv_bridge image_transport rtabmap_msgs
+  roscpp rospy std_msgs sensor_msgs geometry_msgs cv_bridge image_transport rtabmap_ros
   message_generation actionlib_msgs actionlib
 )
 find_package(Boost REQUIRED COMPONENTS system)
