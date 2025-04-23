@@ -29,14 +29,14 @@
 #include <string>
 #include <iostream>
 #include <nav_msgs/Odometry.h>
-#include <rtabmap_ros/ScanDescriptor.h>
+#include <rtabmap_msgs/ScanDescriptor.h>
 #include <rtabmap/core/Compression.h>
-#include "rtabmap_ros/GetMap.h"
-#include "rtabmap_ros/GetNodeData.h"
+#include "rtabmap_msgs/GetMap.h"
+#include "rtabmap_msgs/GetNodeData.h"
 #include <algorithm>
 #include <roscpp/SetLoggerLevel.h>
 #include <cmath>
-typedef message_filters::sync_policies::ExactTime<rtabmap_ros::MapData, rtabmap_ros::Info> MyInfoMapSyncPolicy;
+typedef message_filters::sync_policies::ExactTime<rtabmap_msgs::MapData, rtabmap_msgs::Info> MyInfoMapSyncPolicy;
 
 //##################Parameters##################
 //#########cfg/cmr_lidarloop_params.yaml########
@@ -107,7 +107,7 @@ lidar_data::lidar_data(){
 };
 void lidar_data::read_rtabmap_db(){
   //Read LiDAR data from rtabmap.db
-  rtabmap_ros::GetMap getMapSrv;
+  rtabmap_msgs::GetMap getMapSrv;
   getMapSrv.request.global = true;
   getMapSrv.request.optimized = true;
   getMapSrv.request.graphOnly = true; // If you want the scans, set this to false
@@ -125,7 +125,7 @@ void lidar_data::read_rtabmap_db(){
 
     for(size_t i=0; i<getMapSrv.response.data.nodes.size(); ++i)
     {
-      rtabmap::Signature s = rtabmap_ros::nodeDataFromROS(getMapSrv.response.data.nodes[i]);
+      rtabmap::Signature s = rtabmap_msgs::nodeDataFromROS(getMapSrv.response.data.nodes[i]);
 
       all_ids.push_back(s.id());
 
@@ -155,7 +155,7 @@ void lidar_data::read_rtabmap_db(){
     ROS_ASSERT(getMapSrv.response.data.graph.poses.size() == getMapSrv.response.data.graph.posesId.size());
     for(size_t i=0; i<getMapSrv.response.data.graph.poses.size(); ++i)
     {
-      rtabmap::Transform t = rtabmap_ros::transformFromPoseMsg(getMapSrv.response.data.graph.poses[i]);
+      rtabmap::Transform t = rtabmap_msgs::transformFromPoseMsg(getMapSrv.response.data.graph.poses[i]);
       std::vector<double> temp_xyz={t.x(), t.y(), t.z()};
       Eigen::Matrix4f current_transformation;
       current_transformation <<t.r11(),t.r12(),t.r13(),t.o14(),
@@ -205,7 +205,7 @@ void scanCallback(const sensor_msgs::PointCloud2ConstPtr & pointCloud2Msg)
     return;
 
   //Publish scan descriptor for RTAB-Map
-  rtabmap_ros::ScanDescriptor scanDescriptor;
+  rtabmap_msgs::ScanDescriptor scanDescriptor;
   scanDescriptor.header = pointCloud2Msg->header;
   scanDescriptor.scan_cloud = *pointCloud2Msg;
   scanDescriptor.global_descriptor.type=0;
@@ -289,9 +289,9 @@ void addLinkToRTABMap(){
     //Add link in RTAB-Map
     rtabmap::Transform t=rtabmap::Transform::fromEigen4f(loop_transformation.inverse());
     rtabmap::Link link(fromId, toId, rtabmap::Link::kUserClosure, t, infMatrix);
-    rtabmap_ros::AddLinkRequest req;
-    rtabmap_ros::linkToROS(link, req.link);
-    rtabmap_ros::AddLinkResponse res;
+    rtabmap_msgs::AddLinkRequest req;
+    rtabmap_msgs::linkToROS(link, req.link);
+    rtabmap_msgs::AddLinkResponse res;
     if(!addLinkSrv.call(req, res))
     {
       ROS_ERROR("Failed to call %s service", addLinkSrv.getService().c_str());
@@ -302,7 +302,7 @@ void addLinkToRTABMap(){
       std::vector<int> temp_pair{fromId,toId};
       added_loops.push_back(temp_pair);
       /*//DEBUG global optimized map
-      rtabmap_ros::GetMap getMapSrv_global;
+      rtabmap_msgs::GetMap getMapSrv_global;
       getMapSrv_global.request.global = true;
       getMapSrv_global.request.optimized = true;
       getMapSrv_global.request.graphOnly = true; // If you want the scans, set this to false
@@ -311,7 +311,7 @@ void addLinkToRTABMap(){
         ROS_ERROR("Can't call \"/rtabmap/get_map_data\" service");
       }
       //DEBUG local optimized map
-      rtabmap_ros::GetMap getMapSrv_local;
+      rtabmap_msgs::GetMap getMapSrv_local;
       getMapSrv_local.request.global = false;
       getMapSrv_local.request.optimized = true;
       getMapSrv_local.request.graphOnly = true; // If you want the scans, set this to false
@@ -325,13 +325,13 @@ void addLinkToRTABMap(){
     }
   }
 }
-void mapDataCallback(const rtabmap_ros::MapDataConstPtr & mapDataMsg, const rtabmap_ros::InfoConstPtr & infoMsg)
+void mapDataCallback(const rtabmap_msgs::MapDataConstPtr & mapDataMsg, const rtabmap_msgs::InfoConstPtr & infoMsg)
 {
   //ROS_INFO("\n\t\t\t\tReceived map data!");
   auto start_hr = std::chrono::high_resolution_clock::now();
 
   rtabmap::Statistics stats;
-  rtabmap_ros::infoFromROS(*infoMsg, stats);
+  rtabmap_msgs::infoFromROS(*infoMsg, stats);
 
   //Add link in RTAB-Map, if action server computed new transformation
   if(!result_processed && registration_ac->getState()==actionlib::SimpleClientGoalState::SUCCEEDED){
@@ -361,7 +361,7 @@ void mapDataCallback(const rtabmap_ros::MapDataConstPtr & mapDataMsg, const rtab
   std::map<int, rtabmap::Transform> poses;
   std::multimap<int, rtabmap::Link> links;
   std::map<int, rtabmap::Signature> signatures;
-  rtabmap_ros::mapDataFromROS(*mapDataMsg, poses, links, signatures, mapToOdom);
+  rtabmap_msgs::mapDataFromROS(*mapDataMsg, poses, links, signatures, mapToOdom);
 
   if(!signatures.empty() && signatures.rbegin()->second.sensorData().isValid())
   {
@@ -602,7 +602,7 @@ void mapDataCallback(const rtabmap_ros::MapDataConstPtr & mapDataMsg, const rtab
             random_downsampling(cloud,n_max_points);
 
             //Loop closure id
-            rtabmap_ros::GetNodeData getNodeDataSrv;
+            rtabmap_msgs::GetNodeData getNodeDataSrv;
             getNodeDataSrv.request.ids.push_back(detector_srv.response.loop_id);
             getNodeDataSrv.request.images = false;
             getNodeDataSrv.request.scan = true;
@@ -614,7 +614,7 @@ void mapDataCallback(const rtabmap_ros::MapDataConstPtr & mapDataMsg, const rtab
             }
             else if(getNodeDataSrv.response.data.size() == 1)
             {
-              rtabmap::Signature s = rtabmap_ros::nodeDataFromROS(getNodeDataSrv.response.data[0]);
+              rtabmap::Signature s = rtabmap_msgs::nodeDataFromROS(getNodeDataSrv.response.data[0]);
               rtabmap::LaserScan scan;
               s.sensorData().uncompressDataConst(0, 0, &scan);
               pcl::PointCloud<pcl::PointXYZI>::Ptr target_cloud = rtabmap::util3d::laserScanToPointCloudI(scan, scan.localTransform());
@@ -730,7 +730,7 @@ int main(int argc, char** argv)
   //pnh.param("localization", !MappingMode, !MappingMode);
 
   //service to add link
-  addLinkSrv = nh.serviceClient<rtabmap_ros::AddLink>("/rtabmap/add_link");
+  addLinkSrv = nh.serviceClient<rtabmap_msgs::AddLink>("/rtabmap/add_link");
 
   //action client declaration (use_sim_time has to be false)
   if(nh.hasParam("/use_sim_time")){nh.setParam("/use_sim_time", false);}
@@ -772,13 +772,13 @@ int main(int argc, char** argv)
   //test_memory=lidar_memory;
 
   //Scan descriptor subscription and publisher
-  scanDescriptorPub = nh.advertise<rtabmap_ros::ScanDescriptor>("scan_descriptor", 1);
+  scanDescriptorPub = nh.advertise<rtabmap_msgs::ScanDescriptor>("scan_descriptor", 1);
   ros::Subscriber scanSub;
   scanSub = nh.subscribe(scan_topic_name, 1, scanCallback);
 
   //RTAB-Map subscription
-  message_filters::Subscriber<rtabmap_ros::Info> infoTopic;
-  message_filters::Subscriber<rtabmap_ros::MapData> mapDataTopic;
+  message_filters::Subscriber<rtabmap_msgs::Info> infoTopic;
+  message_filters::Subscriber<rtabmap_msgs::MapData> mapDataTopic;
   infoTopic.subscribe(nh, "/rtabmap/info", 1);
   mapDataTopic.subscribe(nh, "/rtabmap/mapData", 1);
   message_filters::Synchronizer<MyInfoMapSyncPolicy> infoMapSync(

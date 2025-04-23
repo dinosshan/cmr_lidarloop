@@ -10,7 +10,7 @@
 
 #include "cmr_lidarloop/lidar_loopdetection.h"
 #include <fstream>
-#include <rtabmap_ros/ScanDescriptor.h>
+#include <rtabmap_msgs/ScanDescriptor.h>
 #include <rtabmap/core/Compression.h>
 #include <chrono>
 #include <thread>
@@ -23,7 +23,7 @@ float leafsize, t_max, i_limit;
 int n_verify, n_max_nodes, n_ms_verify, n_ms_start, n_max_points, n_min_points, min_inliers, sky_direction;
 //##############################################
 
-typedef message_filters::sync_policies::ExactTime<rtabmap_ros::MapData, rtabmap_ros::Info> MyInfoMapSyncPolicy;
+typedef message_filters::sync_policies::ExactTime<rtabmap_msgs::MapData, rtabmap_msgs::Info> MyInfoMapSyncPolicy;
 
 //Publisher of scan descriptor with corresponding scan
 ros::Publisher scanDescriptorPub;
@@ -82,7 +82,7 @@ void scanCallback(const sensor_msgs::PointCloud2ConstPtr & pointCloud2Msg)
     current_lidar.get_feature_vector(current_feature_vector,lengths_feature_vector);
 
     //Publish scan descriptor for RTAB-Map
-    rtabmap_ros::ScanDescriptor scanDescriptor;
+    rtabmap_msgs::ScanDescriptor scanDescriptor;
     scanDescriptor.header = pointCloud2Msg->header;
     scanDescriptor.scan_cloud = *pointCloud2Msg;
     scanDescriptor.global_descriptor.type=0;
@@ -93,12 +93,12 @@ void scanCallback(const sensor_msgs::PointCloud2ConstPtr & pointCloud2Msg)
 
 detector_data data_for_detector;
 
-void DataCallback(const rtabmap_ros::MapDataConstPtr & mapDataMsg, const rtabmap_ros::InfoConstPtr & infoMsg)
+void DataCallback(const rtabmap_msgs::MapDataConstPtr & mapDataMsg, const rtabmap_msgs::InfoConstPtr & infoMsg)
 {
   ROS_INFO("Received map data!");
 
   rtabmap::Statistics stats;
-  rtabmap_ros::infoFromROS(*infoMsg, stats);
+  rtabmap_msgs::infoFromROS(*infoMsg, stats);
 
   bool smallMovement = (bool)uValue(stats.data(), rtabmap::Statistics::kMemorySmall_movement(), 0.0f);
   bool fastMovement = (bool)uValue(stats.data(), rtabmap::Statistics::kMemoryFast_movement(), 0.0f);
@@ -113,7 +113,7 @@ void DataCallback(const rtabmap_ros::MapDataConstPtr & mapDataMsg, const rtabmap
   std::map<int, rtabmap::Transform> poses;
   std::multimap<int, rtabmap::Link> links;
   std::map<int, rtabmap::Signature> signatures;
-  rtabmap_ros::mapDataFromROS(*mapDataMsg, poses, links, signatures, mapToOdom);
+  rtabmap_msgs::mapDataFromROS(*mapDataMsg, poses, links, signatures, mapToOdom);
 
   if(!signatures.empty() && signatures.rbegin()->second.sensorData().isValid())
   {
@@ -191,13 +191,13 @@ int main(int argc, char** argv)
   }
 
   //Scan subscription and publisher
-  scanDescriptorPub = nh.advertise<rtabmap_ros::ScanDescriptor>("scan_descriptor", 1);
+  scanDescriptorPub = nh.advertise<rtabmap_msgs::ScanDescriptor>("scan_descriptor", 1);
   ros::Subscriber scanSub;
   scanSub = nh.subscribe(scan_topic_name, 1, scanCallback);
 
   //RTAB-Map subscription
-  message_filters::Subscriber<rtabmap_ros::Info> infoTopic;
-  message_filters::Subscriber<rtabmap_ros::MapData> mapDataTopic;
+  message_filters::Subscriber<rtabmap_msgs::Info> infoTopic;
+  message_filters::Subscriber<rtabmap_msgs::MapData> mapDataTopic;
   infoTopic.subscribe(nh, "/rtabmap/info", 1);
   mapDataTopic.subscribe(nh, "/rtabmap/mapData", 1);
   message_filters::Synchronizer<MyInfoMapSyncPolicy> infoMapSync(

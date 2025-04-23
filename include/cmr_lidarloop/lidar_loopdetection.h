@@ -16,10 +16,10 @@
 #include "std_srvs/Empty.h"
 #include <math.h>
 
-#include <rtabmap_ros/MapData.h>
-#include <rtabmap_ros/Info.h>
-#include <rtabmap_ros/MsgConversion.h>
-#include <rtabmap_ros/AddLink.h>
+#include <rtabmap_msgs/MapData.h>
+#include <rtabmap_msgs/Info.h>
+#include <rtabmap/core/MsgConversion.h>
+#include <rtabmap_msgs/AddLink.h>
 
 #include <rtabmap/core/Rtabmap.h>
 #include <rtabmap/core/util3d.h>
