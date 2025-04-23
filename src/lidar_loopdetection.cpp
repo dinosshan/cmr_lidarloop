@@ -361,7 +361,7 @@ void mapDataCallback(const rtabmap_msgs::MapDataConstPtr & mapDataMsg, const rta
   std::map<int, rtabmap::Transform> poses;
   std::multimap<int, rtabmap::Link> links;
   std::map<int, rtabmap::Signature> signatures;
-  rtabmap_msgs::mapDataFromROS(*mapDataMsg, poses, links, signatures, mapToOdom);
+  rtabmap_conversions::mapDataFromROS(*mapDataMsg, poses, links, signatures, mapToOdom);
 
   if(!signatures.empty() && signatures.rbegin()->second.sensorData().isValid())
   {
