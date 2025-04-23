@@ -21,7 +21,7 @@
   <depend>vision_opencv</depend>
   <depend>rtabmap </depend>
   <depend>message_filters </depend>
-  <depend>rtabmap_ros</depend>
+  <depend>rtabmap_ros </depend>
   <depend>message_generation</depend>
   <depend>python-numpy</depend>
   <depend>actionlib_msgs</depend>
